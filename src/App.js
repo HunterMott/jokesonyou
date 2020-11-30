@@ -1,23 +1,37 @@
-import logo from './logo.svg';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Route } from 'react-router-dom';
 import './App.css';
+import { baseURL, config } from './services';
+import Joke from './components/Joke';
+import Nav from './components/Nav';
+import Form from './components/Form';
 
 function App() {
+  const [jokes, setJokes] = useState([]);
+  const [toggleFetch, setToggleFetch] = useState(false)
+
+  useEffect(() => {
+    const getJokes = async () => {
+      const resp = await axios.get(baseURL, config);
+      setJokes(resp.data.records)
+    };
+    getJokes();
+  }, [toggleFetch]);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Nav />
+      <Route exact path='/'>
+        {jokes.map((joke) => (
+          <Joke joke={joke} key={joke.id} setToggleFetch={setToggleFetch} />
+        ))}
+      </Route>
+      <Route path='/new'>
+        <Form jokes={jokes} setToggleFetch={setToggleFetch} />
+      </Route>
+      <Route path='/edit/:id'>
+        <Form jokes={jokes} setToggleFetch={setToggleFetch} />
+      </Route>
     </div>
   );
 }
